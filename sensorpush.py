@@ -125,15 +125,15 @@ class SensorPushGUI(tk.Tk):
 
         cols = ("name", "count", "pct64")
         headers = ["Sensor", "Samples", "% < 64 °F"]
-        self.tree = ttk.Treeview(self, columns=cols, show="headings", height=15)
+        self.tree = ttk.Treeview(self, columns=cols, show="headings", height=10)
         for col, hdr in zip(cols, headers):
             self.tree.heading(col, text=hdr)
             self.tree.column(col, anchor="center", width=140)
-        self.tree.pack(fill="both", expand=True, padx=10, pady=10)
+        self.tree.pack(fill="x", padx=10, pady=10)
 
         logf = ttk.LabelFrame(self, text="Debug Log – each reading")
         logf.pack(fill="both", expand=False, padx=10, pady=(0, 10))
-        self.log = tk.Text(logf, height=14, state="disabled", wrap="word")
+        self.log = tk.Text(logf, height=8, state="disabled", wrap="word")
         self.log.pack(fill="both", expand=True)
 
         img_path = Path("layout.png")
