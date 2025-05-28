@@ -1,6 +1,6 @@
 # SensorPush Temperature Dashboard
 
-A lightweight Tkinter GUI that connects to your **SensorPush Cloud Gateway** account, downloads the last 24 hours of temperature readings for every sensor, and shows what **percentage of those samples were below 64 °F**. Each individual reading is echoed to an on‑screen debug log for full transparency.
+A lightweight Tkinter GUI that connects to your **SensorPush Cloud Gateway** account, downloads the last 24 hours of temperature readings for every sensor, and shows what **percentage of those samples were below 64 °F**.
 
 ---
 
@@ -11,7 +11,6 @@ A lightweight Tkinter GUI that connects to your **SensorPush Cloud Gateway** acc
 | **One‑click fetch**        | Enter your SensorPush dashboard credentials and hit **Fetch 24 h**.                        |
 | **Temperature‑only focus** | Humidity & dew‑point data are ignored by design.                                           |
 | **Per‑sensor stats**       | See total sample count and `% < 64 °F` for each sensor.                                    |
-| **Verbose Debug Log**      | Every raw reading (sensor, timestamp, temp) plus raw JSON snippets are printed live.       |
 | **API shape‑agnostic**     | Handles both legacy (`{"sensors": {…}}`) and modern (`{"samples": […]}`) response formats. |
 | **Layout overlay**         | Displays each sensor on `layout.png` with its `% < 64 °F` value. |
 
@@ -54,7 +53,7 @@ Place your `layout.png` file in the same directory as `sensorpush.py` if you wan
 
 1. **Email / Password** – Same ones you use at [https://dashboard.sensorpush.com](https://dashboard.sensorpush.com).
 2. Click **Fetch 24 h**.
-3. Watch the table and Debug Log populate.
+3. Watch the layout overlay update.
 
 ---
 
@@ -94,7 +93,6 @@ Place your `layout.png` file in the same directory as `sensorpush.py` if you wan
 * **`Sensor list error`** – Make sure your account actually has sensors and cloud access.
 * **`Sample fetch error`** – Gateway offline or subscription expired? Verify connectivity in SensorPush dashboard.
 
-Use the Debug Log: it prints raw JSON payloads and every reading, which helps pinpoint API quirks.
 
 ---
 
