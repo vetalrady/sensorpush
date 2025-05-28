@@ -109,7 +109,12 @@ class SensorPushGUI(tk.Tk):
         self.sensors: Dict[str, Dict] = {}
         self.layout_img: Optional[tk.PhotoImage] = None
         self.canvas: Optional[tk.Canvas] = None
-        self.sensor_positions: Dict[str, tuple[int, int]] = {}
+        # Positions on the layout image keyed **by sensor name**.
+        # Add your own sensor names here with (x, y) coordinates.
+        self.sensor_positions: Dict[str, tuple[int, int]] = {
+            "1": (20, 20),
+            "2": (170, 20),
+        }
         self._build_ui()
 
     # ---- UI ---- #
@@ -231,8 +236,8 @@ class SensorPushGUI(tk.Tk):
         for sid, st in stats.items():
             name = self.sensors.get(sid, {}).get("name", sid)
             pct = (st["below"] / st["count"] * 100) if st["count"] else 0
-            if sid in self.sensor_positions:
-                x, y = self.sensor_positions[sid]
+            if name in self.sensor_positions:
+                x, y = self.sensor_positions[name]
             else:
                 row, col = divmod(i, cols)
                 x = 20 + col * 150
