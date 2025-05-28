@@ -136,8 +136,12 @@ class SensorPushGUI(tk.Tk):
 
         img_path = Path("layout.png")
         if img_path.exists():
+            self._log(f"layout.png found at {img_path.resolve()}")
             try:
                 self.layout_img = tk.PhotoImage(file=str(img_path))
+                self._log(
+                    f"layout.png loaded ({self.layout_img.width()}x{self.layout_img.height()})"
+                )
                 lf_layout = ttk.LabelFrame(self, text="Layout")
                 lf_layout.pack(fill="both", expand=True, padx=10, pady=(0, 10))
                 self.canvas = tk.Canvas(
@@ -149,6 +153,8 @@ class SensorPushGUI(tk.Tk):
                 self.canvas.pack()
             except Exception as e:
                 self._log(f"Failed to load layout.png: {e}")
+        else:
+            self._log("layout.png not found")
 
     # ---- helpers ---- #
     def _log(self, msg: str):
