@@ -102,7 +102,9 @@ class SensorPushGUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("SensorPush – % Temps < 64 °F (24 h)")
-        self.geometry("760x620")
+        # Let the window expand naturally so the optional layout overlay
+        # is fully visible. Use a minimum size to keep the base UI usable.
+        self.minsize(760, 620)
         self.client: Optional[SensorPushClient] = None
         self.sensors: Dict[str, Dict] = {}
         self.layout_img: Optional[tk.PhotoImage] = None
