@@ -213,9 +213,16 @@ class SensorPushGUI(tk.Tk):
         self.after(0, self._update_layout, stats)
 
     def _pct_to_color(self, pct: float) -> str:
+        """Return a hex color from green->yellow->red for 0..100 percent."""
         pct = max(0.0, min(100.0, pct))
-        r = int(pct / 100.0 * 255)
-        g = int((1 - pct / 100.0) * 255)
+        if pct <= 50.0:
+            # 0% -> green (#00ff00), 50% -> yellow (#ffff00)
+            r = int((pct / 50.0) * 255)
+            g = 255
+        else:
+            # 50% -> yellow (#ffff00), 100% -> red (#ff0000)
+            r = 255
+            g = int((1 - (pct - 50.0) / 50.0) * 255)
         return f"#{r:02x}{g:02x}00"
 
     def _update_layout(self, stats: Dict[str, Dict]):
