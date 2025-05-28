@@ -114,8 +114,8 @@ class SensorPushGUI(tk.Tk):
         # Positions on the layout image keyed **by sensor name**.
         # Add your own sensor names here with (x, y) coordinates.
         self.sensor_positions: Dict[str, tuple[int, int]] = {
-            "1": (20, 20),
-            "2": (170, 20),
+            "1": (200, 300),
+            "2": (300, 300),
         }
         self._build_ui()
 
@@ -190,7 +190,6 @@ class SensorPushGUI(tk.Tk):
         self._log(f"Total samples fetched: {len(samples)}")
         for s in samples:
             sid = s["sensor"]; name = self.sensors.get(sid, {}).get("name", sid)
-            self._log(f"{name} @ {s.get('observed','?')} → {s.get('temperature','?')}°F")
         # compute percent <64
         stats: Dict[str, Dict[str, float]] = {}
         for s in samples:
