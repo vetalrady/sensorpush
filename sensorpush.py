@@ -109,6 +109,8 @@ class SensorPushGUI(tk.Tk):
         self.sensors: Dict[str, Dict] = {}
         self.layout_img: Optional[tk.PhotoImage] = None
         self.canvas: Optional[tk.Canvas] = None
+        # Debug log widget removed; keep attribute for _log method
+        self.log: Optional[tk.Text] = None
         # Positions on the layout image keyed **by sensor name**.
         # Add your own sensor names here with (x, y) coordinates.
         self.sensor_positions: Dict[str, tuple[int, int]] = {
@@ -127,20 +129,7 @@ class SensorPushGUI(tk.Tk):
         ttk.Entry(lf, textvariable=self.email_var, width=35).grid(row=0, column=1, padx=5, pady=4)
         ttk.Entry(lf, textvariable=self.pwd_var, show="*", width=35).grid(row=1, column=1, padx=5, pady=4)
         ttk.Button(lf, text="Fetch 24 h", command=self._on_fetch).grid(row=0, column=2, rowspan=2, padx=10)
-
-        cols = ("name", "count", "pct64")
-        headers = ["Sensor", "Samples", "% < 64 °F"]
-        self.tree = ttk.Treeview(self, columns=cols, show="headings", height=10)
-        for col, hdr in zip(cols, headers):
-            self.tree.heading(col, text=hdr)
-            self.tree.column(col, anchor="center", width=140)
-        self.tree.pack(fill="x", padx=10, pady=10)
-
-        logf = ttk.LabelFrame(self, text="Debug Log – each reading")
-        logf.pack(fill="both", expand=False, padx=10, pady=(0, 10))
-        self.log = tk.Text(logf, height=8, state="disabled", wrap="word")
-        self.log.pack(fill="both", expand=True)
-
+        # Sensor list table and debug log removed for clean layout
         img_path = Path("layout.png")
         if img_path.exists():
             self._log(f"layout.png found at {img_path.resolve()}")
@@ -166,10 +155,11 @@ class SensorPushGUI(tk.Tk):
     # ---- helpers ---- #
     def _log(self, msg: str):
         ts = time.strftime("%H:%M:%S")
-        self.log.configure(state="normal")
-        self.log.insert("end", f"{ts} – {msg}\n")
-        self.log.see("end")
-        self.log.configure(state="disabled")
+        if self.log is not None:
+            self.log.configure(state="normal")
+            self.log.insert("end", f"{ts} – {msg}\n")
+            self.log.see("end")
+            self.log.configure(state="disabled")
         logger.info(msg)
 
     # ---- event handlers ---- #
@@ -210,20 +200,8 @@ class SensorPushGUI(tk.Tk):
             st["count"] += 1
             if t < 64:
                 st["below"] += 1
-        self.after(0, self._update_table, stats)
-
-
-    def _update_table(self, stats: Dict[str, Dict]):
-        self.tree.delete(*self.tree.get_children())
-        for sid, st in stats.items():
-            pct = (st["below"] / st["count"] * 100) if st["count"] else 0
-            vals = (
-                self.sensors.get(sid, {}).get("name", sid),
-                st["count"],
-                f"{pct:.1f}%",
-            )
-            self.tree.insert("", "end", iid=sid, values=vals)
-        self._update_layout(stats)
+        # Update layout directly since the sensor table was removed
+        self.after(0, self._update_layout, stats)
 
     def _update_layout(self, stats: Dict[str, Dict]):
         if not self.canvas or not self.layout_img:
