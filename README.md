@@ -84,7 +84,7 @@ Place your `layout.png` file in the same directory as `sensorpush.py` if you wan
 * **Different time span** – Adjust the `start = end - timedelta(hours=24)` line.
 * **CSV export** – The raw `samples` list is already available; write it to disk with the `csv` module.
 * **Graphs** – Pipe the data into `matplotlib` or `plotly` for line charts.
-* **Layout positions** – Edit `sensor_positions` in `sensorpush.py` to place overlays on your `layout.png`.
+* **Layout positions** – Edit `sensor_positions` in `sensorpush.py` to place overlays on your `layout.png` using sensor **names** as the keys.
 
 ---
 
