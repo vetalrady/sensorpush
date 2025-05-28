@@ -238,8 +238,9 @@ class SensorPushGUI(tk.Tk):
                 x = 20 + col * 150
                 y = 20 + row * 70
             i += 1
+            # Tkinter does not support RGBA hex colors. Using plain white.
             self.canvas.create_rectangle(
-                x, y, x + 100, y + 40, fill="#ffffffaa", tags="sensor_box"
+                x, y, x + 100, y + 40, fill="#ffffff", tags="sensor_box"
             )
             self.canvas.create_text(
                 x + 50, y + 12, text=name, tags="sensor_box"
