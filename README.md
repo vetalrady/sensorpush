@@ -44,7 +44,7 @@ pip install requests
 ```bash
 git clone <your‑repo‑url>
 cd sensorpush‑temp‑dashboard
-python sensorpush_gui.py          # or whatever filename you saved
+python sensorpush.py
 ```
 
 ### 3 . Login & Fetch
@@ -58,7 +58,7 @@ python sensorpush_gui.py          # or whatever filename you saved
 ## Project Structure
 
 ```
-├── sensorpush_gui.py   # Main application code (Tk + API client)
+├── sensorpush.py       # Main application code (Tk + API client)
 ├── README.md           # You are here
 └── requirements.txt    # (optional) just requests
 ```
