@@ -13,6 +13,7 @@ A lightweight Tkinter GUI that connects to your **SensorPush Cloud Gateway** acc
 | **Per‑sensor stats**       | See total sample count and `% < 64 °F` for each sensor.                                    |
 | **Verbose Debug Log**      | Every raw reading (sensor, timestamp, temp) plus raw JSON snippets are printed live.       |
 | **API shape‑agnostic**     | Handles both legacy (`{"sensors": {…}}`) and modern (`{"samples": […]}`) response formats. |
+| **Layout overlay**         | Displays each sensor on `layout.png` with its `% < 64 °F` value. |
 
 ---
 
@@ -46,6 +47,8 @@ git clone <your‑repo‑url>
 cd sensorpush‑temp‑dashboard
 python sensorpush.py
 ```
+
+Place your `layout.png` file in the same directory as `sensorpush.py` if you want to see the overlay feature.
 
 ### 3 . Login & Fetch
 
@@ -81,6 +84,7 @@ python sensorpush.py
 * **Different time span** – Adjust the `start = end - timedelta(hours=24)` line.
 * **CSV export** – The raw `samples` list is already available; write it to disk with the `csv` module.
 * **Graphs** – Pipe the data into `matplotlib` or `plotly` for line charts.
+* **Layout positions** – Edit `sensor_positions` in `sensorpush.py` to place overlays on your `layout.png`.
 
 ---
 

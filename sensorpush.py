@@ -14,6 +14,7 @@ import time
 import tkinter as tk
 from datetime import datetime, timedelta, timezone
 from tkinter import ttk, messagebox
+from pathlib import Path
 import logging
 from typing import List, Dict, Optional
 
@@ -104,6 +105,9 @@ class SensorPushGUI(tk.Tk):
         self.geometry("760x620")
         self.client: Optional[SensorPushClient] = None
         self.sensors: Dict[str, Dict] = {}
+        self.layout_img: Optional[tk.PhotoImage] = None
+        self.canvas: Optional[tk.Canvas] = None
+        self.sensor_positions: Dict[str, tuple[int, int]] = {}
         self._build_ui()
 
     # ---- UI ---- #
@@ -129,6 +133,22 @@ class SensorPushGUI(tk.Tk):
         logf.pack(fill="both", expand=False, padx=10, pady=(0, 10))
         self.log = tk.Text(logf, height=14, state="disabled", wrap="word")
         self.log.pack(fill="both", expand=True)
+
+        img_path = Path("layout.png")
+        if img_path.exists():
+            try:
+                self.layout_img = tk.PhotoImage(file=str(img_path))
+                lf_layout = ttk.LabelFrame(self, text="Layout")
+                lf_layout.pack(fill="both", expand=True, padx=10, pady=(0, 10))
+                self.canvas = tk.Canvas(
+                    lf_layout,
+                    width=self.layout_img.width(),
+                    height=self.layout_img.height(),
+                )
+                self.canvas.create_image(0, 0, image=self.layout_img, anchor="nw")
+                self.canvas.pack()
+            except Exception as e:
+                self._log(f"Failed to load layout.png: {e}")
 
     # ---- helpers ---- #
     def _log(self, msg: str):
@@ -179,6 +199,7 @@ class SensorPushGUI(tk.Tk):
                 st["below"] += 1
         self.after(0, self._update_table, stats)
 
+
     def _update_table(self, stats: Dict[str, Dict]):
         self.tree.delete(*self.tree.get_children())
         for sid, st in stats.items():
@@ -189,6 +210,35 @@ class SensorPushGUI(tk.Tk):
                 f"{pct:.1f}%",
             )
             self.tree.insert("", "end", iid=sid, values=vals)
+        self._update_layout(stats)
+
+    def _update_layout(self, stats: Dict[str, Dict]):
+        if not self.canvas or not self.layout_img:
+            return
+        self.canvas.delete("sensor_box")
+        width = self.layout_img.width()
+        height = self.layout_img.height()
+        cols = max(1, int(width / 150))
+        i = 0
+        for sid, st in stats.items():
+            name = self.sensors.get(sid, {}).get("name", sid)
+            pct = (st["below"] / st["count"] * 100) if st["count"] else 0
+            if sid in self.sensor_positions:
+                x, y = self.sensor_positions[sid]
+            else:
+                row, col = divmod(i, cols)
+                x = 20 + col * 150
+                y = 20 + row * 70
+            i += 1
+            self.canvas.create_rectangle(
+                x, y, x + 100, y + 40, fill="#ffffffaa", tags="sensor_box"
+            )
+            self.canvas.create_text(
+                x + 50, y + 12, text=name, tags="sensor_box"
+            )
+            self.canvas.create_text(
+                x + 50, y + 28, text=f"{pct:.1f}%", tags="sensor_box"
+            )
 
 
 # ==================== main ==================== #
