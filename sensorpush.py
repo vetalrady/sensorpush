@@ -202,6 +202,12 @@ class SensorPushGUI(tk.Tk):
         # Update layout directly since the sensor table was removed
         self.after(0, self._update_layout, stats)
 
+    def _pct_to_color(self, pct: float) -> str:
+        pct = max(0.0, min(100.0, pct))
+        r = int(pct / 100.0 * 255)
+        g = int((1 - pct / 100.0) * 255)
+        return f"#{r:02x}{g:02x}00"
+
     def _update_layout(self, stats: Dict[str, Dict]):
         if not self.canvas or not self.layout_img:
             return
@@ -220,9 +226,9 @@ class SensorPushGUI(tk.Tk):
                 x = 20 + col * 150
                 y = 20 + row * 70
             i += 1
-            # Tkinter does not support RGBA hex colors. Using plain white.
+            color = self._pct_to_color(pct)
             self.canvas.create_rectangle(
-                x, y, x + 100, y + 40, fill="#ffffff", tags="sensor_box"
+                x, y, x + 100, y + 40, fill=color, tags="sensor_box"
             )
             self.canvas.create_text(
                 x + 50, y + 12, text=name, tags="sensor_box"
