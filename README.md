@@ -51,9 +51,10 @@ Place your `layout.png` file in the same directory as `sensorpush.py` if you wan
 
 ### 3 . Login & Fetch
 
-1. **Email / Password** – Same ones you use at [https://dashboard.sensorpush.com](https://dashboard.sensorpush.com).
-2. Click **Fetch 24 h**.
-3. Watch the layout overlay update.
+1. **Email / Password** – The login fields are pre-filled with the values set
+   in `DEFAULT_EMAIL` and `DEFAULT_PASSWORD` inside `sensorpush.py`. Adjust
+   them if needed, then click **Fetch 24 h**.
+2. Watch the layout overlay update.
 
 ---
 

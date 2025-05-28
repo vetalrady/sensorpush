@@ -23,6 +23,13 @@ import requests
 API_BASE = "https://api.sensorpush.com/api/v1"
 UTC = timezone.utc
 
+# Default credentials used to pre-fill the login fields in the GUI. Change
+# these values if you want different hard coded credentials. They are only
+# used as the initial values for the corresponding ``StringVar`` objects and
+# can still be edited by the user.
+DEFAULT_EMAIL = "user@example.com"
+DEFAULT_PASSWORD = "change-me"
+
 # ---------- logging ---------- #
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
@@ -125,7 +132,10 @@ class SensorPushGUI(tk.Tk):
         lf.pack(fill="x", padx=10, pady=5)
         ttk.Label(lf, text="Email:").grid(row=0, column=0, sticky="e", padx=5, pady=4)
         ttk.Label(lf, text="Password:").grid(row=1, column=0, sticky="e", padx=5, pady=4)
-        self.email_var = tk.StringVar(); self.pwd_var = tk.StringVar()
+        # Pre-fill the login fields with the default credentials so the user
+        # doesn't have to type them in every time. They remain editable.
+        self.email_var = tk.StringVar(value=DEFAULT_EMAIL)
+        self.pwd_var = tk.StringVar(value=DEFAULT_PASSWORD)
         ttk.Entry(lf, textvariable=self.email_var, width=35).grid(row=0, column=1, padx=5, pady=4)
         ttk.Entry(lf, textvariable=self.pwd_var, show="*", width=35).grid(row=1, column=1, padx=5, pady=4)
         ttk.Button(lf, text="Fetch 24 h", command=self._on_fetch).grid(row=0, column=2, rowspan=2, padx=10)
