@@ -13,6 +13,7 @@ A lightweight Tkinter GUI that connects to your **SensorPush Cloud Gateway** acc
 | **Per‑sensor stats**       | See total sample count and `% < 64 °F` for each sensor.                                    |
 | **API shape‑agnostic**     | Handles both legacy (`{"sensors": {…}}`) and modern (`{"samples": […]}`) response formats. |
 | **Layout overlay**         | Displays each sensor on `layout.png` with its `% < 64 °F` value. |
+| **Double‑click graph**     | Open a 24 h temperature line chart by double‑clicking a sensor box. |
 
 ---
 
@@ -27,10 +28,10 @@ A lightweight Tkinter GUI that connects to your **SensorPush Cloud Gateway** acc
 ### 1 . Prerequisites
 
 * **Python ≥ 3.8**
-* `pip install` the only third‑party dependency:
+* `pip install` the required third‑party dependencies:
 
 ```bash
-pip install requests
+pip install requests matplotlib
 ```
 
 > **Linux users:** Install Tk if it’s missing:
@@ -63,7 +64,7 @@ Place your `layout.png` file in the same directory as `sensorpush.py` if you wan
 ```
 ├── sensorpush.py       # Main application code (Tk + API client)
 ├── README.md           # You are here
-└── requirements.txt    # (optional) just requests
+└── requirements.txt    # dependencies for the GUI
 ```
 
 ---

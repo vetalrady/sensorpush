@@ -18,6 +18,9 @@ from pathlib import Path
 import logging
 from typing import List, Dict, Optional
 
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
 import requests
 
 API_BASE = "https://api.sensorpush.com/api/v1"
@@ -114,6 +117,8 @@ class SensorPushGUI(tk.Tk):
         self.minsize(760, 620)
         self.client: Optional[SensorPushClient] = None
         self.sensors: Dict[str, Dict] = {}
+        # Raw temperature samples keyed by sensor id for the last fetch
+        self.samples_by_sensor: Dict[str, List[tuple[datetime, float]]] = {}
         self.layout_img: Optional[tk.PhotoImage] = None
         self.canvas: Optional[tk.Canvas] = None
         # Debug log widget removed; keep attribute for _log method
@@ -160,6 +165,7 @@ class SensorPushGUI(tk.Tk):
                 )
                 self.canvas.create_image(0, 0, image=self.layout_img, anchor="nw")
                 self.canvas.pack()
+                self.canvas.tag_bind("sensor_box", "<Double-Button-1>", self._on_sensor_double)
             except Exception as e:
                 self._log(f"Failed to load layout.png: {e}")
         else:
@@ -201,8 +207,24 @@ class SensorPushGUI(tk.Tk):
         except Exception as e:
             self._log(f"Sample fetch error: {e}"); return
         self._log(f"Total samples fetched: {len(samples)}")
+        # group samples per sensor for later graph display
+        self.samples_by_sensor.clear()
         for s in samples:
-            sid = s["sensor"]; name = self.sensors.get(sid, {}).get("name", sid)
+            sid = s["sensor"]
+            t = s.get("temperature")
+            # Try multiple timestamp field names to be API-shape agnostic
+            ts_str = (
+                s.get("observed")
+                or s.get("timestamp")
+                or s.get("time")
+                or s.get("date")
+            )
+            if ts_str and t is not None:
+                try:
+                    ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    self.samples_by_sensor.setdefault(sid, []).append((ts, t))
+                except Exception:
+                    pass
         # compute percent <64
         stats: Dict[str, Dict[str, float]] = {}
         for s in samples:
@@ -247,15 +269,54 @@ class SensorPushGUI(tk.Tk):
                 y = 20 + row * 70
             i += 1
             color = self._pct_to_color(pct)
+            tags = ("sensor_box", sid)
             self.canvas.create_rectangle(
-                x, y, x + 100, y + 40, fill=color, tags="sensor_box"
+                x, y, x + 100, y + 40, fill=color, tags=tags
             )
             self.canvas.create_text(
-                x + 50, y + 12, text=name, tags="sensor_box"
+                x + 50, y + 12, text=name, tags=tags
             )
             self.canvas.create_text(
-                x + 50, y + 28, text=f"{pct:.1f}%", tags="sensor_box"
+                x + 50, y + 28, text=f"{pct:.1f}%", tags=tags
             )
+
+    def _on_sensor_double(self, event: tk.Event):
+        """Open a window with a temperature line graph for the clicked sensor."""
+        if not self.canvas:
+            return
+        item = self.canvas.find_withtag("current")
+        if not item:
+            return
+        tags = self.canvas.gettags(item[0])
+        sid = None
+        for t in tags:
+            if t != "sensor_box":
+                sid = t
+                break
+        if sid:
+            self._show_graph_window(sid)
+
+    def _show_graph_window(self, sensor_id: str):
+        data = self.samples_by_sensor.get(sensor_id)
+        if not data:
+            messagebox.showinfo("No Data", "No samples available for this sensor")
+            return
+        name = self.sensors.get(sensor_id, {}).get("name", sensor_id)
+        win = tk.Toplevel(self)
+        win.title(f"{name} – last 24h")
+        fig = Figure(figsize=(6, 3), dpi=100)
+        ax = fig.add_subplot(111)
+        data_sorted = sorted(data, key=lambda p: p[0])
+        times = [p[0] for p in data_sorted]
+        temps = [p[1] for p in data_sorted]
+        ax.plot(times, temps, marker="o", linestyle="-")
+        ax.set_ylim(49, 76)
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Temp (°F)")
+        fig.autofmt_xdate()
+        canvas = FigureCanvasTkAgg(fig, master=win)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
 
 
 # ==================== main ==================== #
