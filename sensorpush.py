@@ -121,8 +121,11 @@ class SensorPushGUI(tk.Tk):
         # Positions on the layout image keyed **by sensor name**.
         # Add your own sensor names here with (x, y) coordinates.
         self.sensor_positions: Dict[str, tuple[int, int]] = {
-            "1": (200, 300),
-            "2": (300, 300),
+            "1": (330, 400),
+            "2": (430, 400),
+            "3": (530, 200),
+            "4": (530, 600),
+            "5": (160, 500),
         }
         self._build_ui()
 
