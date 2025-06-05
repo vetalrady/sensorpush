@@ -133,6 +133,12 @@ class SensorPushGUI(tk.Tk):
             "4": (530, 600),
             "5": (160, 500),
         }
+        # Optional nicknames shown on the "All Graph" window. Keys are
+        # sensor **names** as reported by the API. Adjust as needed.
+        self.sensor_nicknames: Dict[str, str] = {
+            # "Living Room": "LR",
+            # "Garage": "GA",
+        }
         self._build_ui()
         # start fetching automatically after UI loads
         self.after(100, self._start_fetch)
@@ -387,7 +393,9 @@ class SensorPushGUI(tk.Tk):
                 data_sorted = sorted(data, key=lambda p: p[0])
                 times = [p[0] for p in data_sorted]
                 temps = [p[1] for p in data_sorted]
-                label = self.sensors.get(sid, {}).get("name", sid)
+                name = self.sensors.get(sid, {}).get("name", sid)
+                nick = self.sensor_nicknames.get(name)
+                label = f"{nick} ({name})" if nick else name
                 ax.plot(times, temps, label=label)
             ax.set_ylim(49, 80)
             ax.axhline(64, color="red", linestyle="--", linewidth=1)
@@ -401,7 +409,9 @@ class SensorPushGUI(tk.Tk):
             var = tk.BooleanVar(value=True)
             vars_by_sid[sid] = var
             name = sensor.get("name", sid)
-            chk = ttk.Checkbutton(control, text=name, variable=var, command=update_plot)
+            nick = self.sensor_nicknames.get(name)
+            display = f"{nick} ({name})" if nick else name
+            chk = ttk.Checkbutton(control, text=display, variable=var, command=update_plot)
             chk.pack(side="left", padx=2)
 
         canvas = self.FigureCanvasTkAgg(fig, master=win)
