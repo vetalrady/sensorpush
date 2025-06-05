@@ -137,6 +137,36 @@ class SensorPushGUI(tk.Tk):
         # start fetching automatically after UI loads
         self.after(100, self._start_fetch)
 
+    def _show_loading(self, msg: str = "Loading…"):
+        """Overlay a translucent message on the layout canvas."""
+        if not self.canvas or not self.layout_img:
+            return
+        width = self.layout_img.width()
+        height = self.layout_img.height()
+        self.canvas.delete("loading_overlay")
+        self.canvas.create_rectangle(
+            0,
+            0,
+            width,
+            height,
+            fill="#000",
+            stipple="gray50",
+            tags="loading_overlay",
+        )
+        self.canvas.create_text(
+            width // 2,
+            height // 2,
+            text=msg,
+            fill="white",
+            font=("TkDefaultFont", 16, "bold"),
+            tags="loading_overlay",
+        )
+        self.update_idletasks()
+
+    def _hide_loading(self):
+        if self.canvas:
+            self.canvas.delete("loading_overlay")
+
     # ---- UI ---- #
     def _build_ui(self):
         # Only the layout overlay is displayed; login is automatic
@@ -181,6 +211,9 @@ class SensorPushGUI(tk.Tk):
             from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
             self.Figure = Figure
             self.FigureCanvasTkAgg = FigureCanvasTkAgg
+
+        # Show loading overlay before blocking network requests
+        self._show_loading("Fetching data…")
 
         self._log("Logging in…")
         self.client = SensorPushClient(DEFAULT_EMAIL, DEFAULT_PASSWORD)
@@ -232,6 +265,7 @@ class SensorPushGUI(tk.Tk):
                 st["below"] += 1
         # Update layout directly since the sensor table was removed
         self.after(0, self._update_layout, stats)
+        self.after(0, self._hide_loading)
 
     def _pct_to_color(self, pct: float) -> str:
         """Return a hex color from green->yellow->red for 0..100 percent."""
