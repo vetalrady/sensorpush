@@ -344,13 +344,13 @@ class SensorPushGUI(tk.Tk):
         win = tk.Toplevel(self)
         win.title(f"{name} – last 24h")
         # 2× larger graph with fixed Y‑axis scaling
-        fig = self.Figure(figsize=(12, 6), dpi=100)
+        fig = self.Figure(figsize=(16, 8), dpi=100)
         ax = fig.add_subplot(111)
         data_sorted = sorted(data, key=lambda p: p[0])
         times = [p[0] for p in data_sorted]
         temps = [p[1] for p in data_sorted]
         ax.plot(times, temps, linestyle="-")
-        ax.set_ylim(59, 78)
+        ax.set_ylim(49, 80)
         # horizontal line at 64 °F for quick visual reference
         ax.axhline(64, color="red", linestyle="--", linewidth=1)
         ax.set_xlabel("Time")
@@ -371,7 +371,7 @@ class SensorPushGUI(tk.Tk):
         control = ttk.Frame(win)
         control.pack(fill="x", padx=5, pady=5)
 
-        fig = self.Figure(figsize=(12, 6), dpi=100)
+        fig = self.Figure(figsize=(16, 8), dpi=100)
         ax = fig.add_subplot(111)
 
         vars_by_sid: Dict[str, tk.BooleanVar] = {}
@@ -389,7 +389,7 @@ class SensorPushGUI(tk.Tk):
                 temps = [p[1] for p in data_sorted]
                 label = self.sensors.get(sid, {}).get("name", sid)
                 ax.plot(times, temps, label=label)
-            ax.set_ylim(59, 78)
+            ax.set_ylim(49, 80)
             ax.axhline(64, color="red", linestyle="--", linewidth=1)
             ax.set_xlabel("Time")
             ax.set_ylabel("Temp (°F)")
