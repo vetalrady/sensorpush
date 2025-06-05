@@ -18,8 +18,6 @@ from pathlib import Path
 import logging
 from typing import List, Dict, Optional
 
-from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 import requests
 
@@ -123,6 +121,9 @@ class SensorPushGUI(tk.Tk):
         self.canvas: Optional[tk.Canvas] = None
         # Debug log widget removed; keep attribute for _log method
         self.log: Optional[tk.Text] = None
+        # matplotlib objects lazily imported
+        self.Figure = None
+        self.FigureCanvasTkAgg = None
         # Positions on the layout image keyed **by sensor name**.
         # Add your own sensor names here with (x, y) coordinates.
         self.sensor_positions: Dict[str, tuple[int, int]] = {
@@ -133,21 +134,12 @@ class SensorPushGUI(tk.Tk):
             "5": (160, 500),
         }
         self._build_ui()
+        # start fetching automatically after UI loads
+        self.after(100, self._start_fetch)
 
     # ---- UI ---- #
     def _build_ui(self):
-        lf = ttk.LabelFrame(self, text="Login")
-        lf.pack(fill="x", padx=10, pady=5)
-        ttk.Label(lf, text="Email:").grid(row=0, column=0, sticky="e", padx=5, pady=4)
-        ttk.Label(lf, text="Password:").grid(row=1, column=0, sticky="e", padx=5, pady=4)
-        # Pre-fill the login fields with the default credentials so the user
-        # doesn't have to type them in every time. They remain editable.
-        self.email_var = tk.StringVar(value=DEFAULT_EMAIL)
-        self.pwd_var = tk.StringVar(value=DEFAULT_PASSWORD)
-        ttk.Entry(lf, textvariable=self.email_var, width=35).grid(row=0, column=1, padx=5, pady=4)
-        ttk.Entry(lf, textvariable=self.pwd_var, show="*", width=35).grid(row=1, column=1, padx=5, pady=4)
-        ttk.Button(lf, text="Fetch 24 h", command=self._on_fetch).grid(row=0, column=2, rowspan=2, padx=10)
-        # Sensor list table and debug log removed for clean layout
+        # Only the layout overlay is displayed; login is automatic
         img_path = Path("layout.png")
         if img_path.exists():
             self._log(f"layout.png found at {img_path.resolve()}")
@@ -182,12 +174,16 @@ class SensorPushGUI(tk.Tk):
         logger.info(msg)
 
     # ---- event handlers ---- #
-    def _on_fetch(self):
-        email, pwd = self.email_var.get().strip(), self.pwd_var.get().strip()
-        if not email or not pwd:
-            messagebox.showwarning("Missing", "Enter email & password"); return
+    def _start_fetch(self):
+        # Import matplotlib lazily when fetching begins
+        if self.Figure is None:
+            from matplotlib.figure import Figure
+            from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+            self.Figure = Figure
+            self.FigureCanvasTkAgg = FigureCanvasTkAgg
+
         self._log("Logging in…")
-        self.client = SensorPushClient(email, pwd)
+        self.client = SensorPushClient(DEFAULT_EMAIL, DEFAULT_PASSWORD)
         try:
             self.client.login()
         except Exception as e:
@@ -304,7 +300,7 @@ class SensorPushGUI(tk.Tk):
         name = self.sensors.get(sensor_id, {}).get("name", sensor_id)
         win = tk.Toplevel(self)
         win.title(f"{name} – last 24h")
-        fig = Figure(figsize=(6, 3), dpi=100)
+        fig = self.Figure(figsize=(6, 3), dpi=100)
         ax = fig.add_subplot(111)
         data_sorted = sorted(data, key=lambda p: p[0])
         times = [p[0] for p in data_sorted]
@@ -314,7 +310,7 @@ class SensorPushGUI(tk.Tk):
         ax.set_xlabel("Time")
         ax.set_ylabel("Temp (°F)")
         fig.autofmt_xdate()
-        canvas = FigureCanvasTkAgg(fig, master=win)
+        canvas = self.FigureCanvasTkAgg(fig, master=win)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
 
