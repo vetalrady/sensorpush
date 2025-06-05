@@ -188,6 +188,15 @@ class SensorPushGUI(tk.Tk):
                 self.canvas.create_image(0, 0, image=self.layout_img, anchor="nw")
                 self.canvas.pack()
                 self.canvas.tag_bind("sensor_box", "<Double-Button-1>", self._on_sensor_double)
+                # Button to show a combined graph for selected sensors
+                btn = ttk.Button(self.canvas, text="All Graph", command=self._show_all_graph_window)
+                self.canvas.create_window(
+                    self.layout_img.width() - 10,
+                    10,
+                    anchor="ne",
+                    window=btn,
+                    tags="all_graph_button",
+                )
             except Exception as e:
                 self._log(f"Failed to load layout.png: {e}")
         else:
@@ -350,6 +359,56 @@ class SensorPushGUI(tk.Tk):
         canvas = self.FigureCanvasTkAgg(fig, master=win)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def _show_all_graph_window(self):
+        """Open a window showing multiple sensors with selectable lines."""
+        if not self.samples_by_sensor:
+            messagebox.showinfo("No Data", "No samples available to display")
+            return
+        win = tk.Toplevel(self)
+        win.title("All Sensors – last 24h")
+
+        control = ttk.Frame(win)
+        control.pack(fill="x", padx=5, pady=5)
+
+        fig = self.Figure(figsize=(12, 6), dpi=100)
+        ax = fig.add_subplot(111)
+
+        vars_by_sid: Dict[str, tk.BooleanVar] = {}
+
+        def update_plot(*_):
+            ax.clear()
+            for sid, var in vars_by_sid.items():
+                if not var.get():
+                    continue
+                data = self.samples_by_sensor.get(sid)
+                if not data:
+                    continue
+                data_sorted = sorted(data, key=lambda p: p[0])
+                times = [p[0] for p in data_sorted]
+                temps = [p[1] for p in data_sorted]
+                label = self.sensors.get(sid, {}).get("name", sid)
+                ax.plot(times, temps, label=label)
+            ax.set_ylim(59, 78)
+            ax.axhline(64, color="red", linestyle="--", linewidth=1)
+            ax.set_xlabel("Time")
+            ax.set_ylabel("Temp (°F)")
+            ax.legend()
+            fig.autofmt_xdate()
+            canvas.draw()
+
+        for sid, sensor in self.sensors.items():
+            var = tk.BooleanVar(value=True)
+            vars_by_sid[sid] = var
+            name = sensor.get("name", sid)
+            chk = ttk.Checkbutton(control, text=name, variable=var, command=update_plot)
+            chk.pack(side="left", padx=2)
+
+        canvas = self.FigureCanvasTkAgg(fig, master=win)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+        update_plot()
 
 
 # ==================== main ==================== #
