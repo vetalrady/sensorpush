@@ -334,13 +334,16 @@ class SensorPushGUI(tk.Tk):
         name = self.sensors.get(sensor_id, {}).get("name", sensor_id)
         win = tk.Toplevel(self)
         win.title(f"{name} – last 24h")
-        fig = self.Figure(figsize=(6, 3), dpi=100)
+        # 2× larger graph with fixed Y‑axis scaling
+        fig = self.Figure(figsize=(12, 6), dpi=100)
         ax = fig.add_subplot(111)
         data_sorted = sorted(data, key=lambda p: p[0])
         times = [p[0] for p in data_sorted]
         temps = [p[1] for p in data_sorted]
-        ax.plot(times, temps, marker="o", linestyle="-")
-        ax.set_ylim(49, 76)
+        ax.plot(times, temps, linestyle="-")
+        ax.set_ylim(59, 78)
+        # horizontal line at 64 °F for quick visual reference
+        ax.axhline(64, color="red", linestyle="--", linewidth=1)
         ax.set_xlabel("Time")
         ax.set_ylabel("Temp (°F)")
         fig.autofmt_xdate()
