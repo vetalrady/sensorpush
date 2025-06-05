@@ -377,8 +377,11 @@ class SensorPushGUI(tk.Tk):
         win = tk.Toplevel(self)
         win.title("All Sensors – last 24h")
 
-        control = ttk.Frame(win)
-        control.pack(fill="x", padx=5, pady=5)
+        container = ttk.Frame(win)
+        container.pack(fill="both", expand=True)
+
+        control = ttk.Frame(container)
+        control.pack(side="left", fill="y", padx=5, pady=5)
 
         fig = self.Figure(figsize=(16, 8), dpi=100)
         ax = fig.add_subplot(111)
@@ -415,11 +418,11 @@ class SensorPushGUI(tk.Tk):
             nick = self.sensor_nicknames.get(name)
             display = f"{nick} ({name})" if nick else name
             chk = ttk.Checkbutton(control, text=display, variable=var, command=update_plot)
-            chk.pack(side="left", padx=2)
+            chk.pack(anchor="w", pady=2)
 
-        canvas = self.FigureCanvasTkAgg(fig, master=win)
+        canvas = self.FigureCanvasTkAgg(fig, master=container)
         canvas.draw()
-        canvas.get_tk_widget().pack(fill="both", expand=True)
+        canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
 
         update_plot()
 
