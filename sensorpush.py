@@ -136,8 +136,11 @@ class SensorPushGUI(tk.Tk):
         # Optional nicknames shown on the "All Graph" window. Keys are
         # sensor **names** as reported by the API. Adjust as needed.
         self.sensor_nicknames: Dict[str, str] = {
-            # "Living Room": "LR",
-            # "Garage": "GA",
+             "1": "ruvim",
+             "2": "ruvim",
+             "3": "Swiss",
+             "4": "Mitsubishi",
+             "5": "3d Printing Room",
         }
         self._build_ui()
         # start fetching automatically after UI loads
