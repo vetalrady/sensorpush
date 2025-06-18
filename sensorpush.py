@@ -124,7 +124,6 @@ class SensorPushGUI(tk.Tk):
         # matplotlib objects lazily imported
         self.Figure = None
         self.FigureCanvasTkAgg = None
-        self.mdates = None
         # Positions on the layout image keyed **by sensor name**.
         # Add your own sensor names here with (x, y) coordinates.
         self.sensor_positions: Dict[str, tuple[int, int]] = {
@@ -228,10 +227,8 @@ class SensorPushGUI(tk.Tk):
         if self.Figure is None:
             from matplotlib.figure import Figure
             from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-            import matplotlib.dates as mdates
             self.Figure = Figure
             self.FigureCanvasTkAgg = FigureCanvasTkAgg
-            self.mdates = mdates
 
         # Show loading overlay before blocking network requests
         self._show_loading("Fetching data…")
@@ -367,9 +364,6 @@ class SensorPushGUI(tk.Tk):
         ax.axhline(64, color="red", linestyle="--", linewidth=1)
         ax.set_xlabel("Time")
         ax.set_ylabel("Temp (°F)")
-        if self.mdates:
-            ax.xaxis.set_major_locator(self.mdates.HourLocator(interval=2, tz=UTC))
-            ax.xaxis.set_major_formatter(self.mdates.DateFormatter("%-I%p", tz=UTC))
         fig.autofmt_xdate()
         canvas = self.FigureCanvasTkAgg(fig, master=win)
         canvas.draw()
@@ -414,9 +408,6 @@ class SensorPushGUI(tk.Tk):
             ax.set_xlabel("Time")
             ax.set_ylabel("Temp (°F)")
             ax.legend()
-            if self.mdates:
-                ax.xaxis.set_major_locator(self.mdates.HourLocator(interval=2, tz=UTC))
-                ax.xaxis.set_major_formatter(self.mdates.DateFormatter("%-I%p", tz=UTC))
             fig.autofmt_xdate()
             canvas.draw()
 
