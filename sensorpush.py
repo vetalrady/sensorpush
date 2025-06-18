@@ -355,12 +355,6 @@ class SensorPushGUI(tk.Tk):
         # 2× larger graph with fixed Y‑axis scaling
         fig = self.Figure(figsize=(16, 8), dpi=100)
         ax = fig.add_subplot(111)
-        # Use 2‑hour ticks across the last 24 h window
-        from matplotlib import dates as mdates
-        now = datetime.now(tz=UTC)
-        ax.set_xlim(now - timedelta(hours=24), now)
-        ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter("%-I%p"))
         data_sorted = sorted(data, key=lambda p: p[0])
         times = [p[0] for p in data_sorted]
         temps = [p[1] for p in data_sorted]
@@ -396,11 +390,6 @@ class SensorPushGUI(tk.Tk):
 
         def update_plot(*_):
             ax.clear()
-            from matplotlib import dates as mdates
-            now = datetime.now(tz=UTC)
-            ax.set_xlim(now - timedelta(hours=24), now)
-            ax.xaxis.set_major_locator(mdates.HourLocator(interval=2))
-            ax.xaxis.set_major_formatter(mdates.DateFormatter("%-I%p"))
             for sid, var in vars_by_sid.items():
                 if not var.get():
                     continue
