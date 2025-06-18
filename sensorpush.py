@@ -109,6 +109,8 @@ class SensorPushClient:
 class SensorPushGUI(tk.Tk):
     def __init__(self):
         super().__init__()
+        import matplotlib
+        matplotlib.rcParams["timezone"] = "US/Central"
         self.title("SensorPush – % Temps < 64 °F (24 h)")
         # Let the window expand naturally so the optional layout overlay
         # is fully visible. Use a minimum size to keep the base UI usable.
