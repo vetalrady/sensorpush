@@ -364,6 +364,9 @@ class SensorPushGUI(tk.Tk):
         ax.axhline(64, color="red", linestyle="--", linewidth=1)
         ax.set_xlabel("Time")
         ax.set_ylabel("Temp (°F)")
+        from matplotlib.dates import DateFormatter, HourLocator
+        ax.xaxis.set_major_locator(HourLocator(interval=2))
+        ax.xaxis.set_major_formatter(DateFormatter("%-I%p"))
         fig.autofmt_xdate()
         canvas = self.FigureCanvasTkAgg(fig, master=win)
         canvas.draw()
@@ -407,6 +410,9 @@ class SensorPushGUI(tk.Tk):
             ax.axhline(64, color="red", linestyle="--", linewidth=1)
             ax.set_xlabel("Time")
             ax.set_ylabel("Temp (°F)")
+            from matplotlib.dates import DateFormatter, HourLocator
+            ax.xaxis.set_major_locator(HourLocator(interval=2))
+            ax.xaxis.set_major_formatter(DateFormatter("%-I%p"))
             ax.legend()
             fig.autofmt_xdate()
             canvas.draw()
