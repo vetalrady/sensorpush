@@ -123,9 +123,6 @@ class SensorPushGUI(tk.Tk):
         self.canvas: Optional[tk.Canvas] = None
         # Debug log widget removed; keep attribute for _log method
         self.log: Optional[tk.Text] = None
-        self.status_var = tk.StringVar(value="")
-        self.progress_var = tk.DoubleVar(value=0.0)
-        self.progressbar: Optional[ttk.Progressbar] = None
         # matplotlib objects lazily imported
         self.Figure = None
         self.FigureCanvasTkAgg = None
@@ -181,15 +178,6 @@ class SensorPushGUI(tk.Tk):
         if self.canvas:
             self.canvas.delete("loading_overlay")
 
-    def _set_progress(self, step: float, msg: str = ""):
-        self.progress_var.set(step)
-        self.status_var.set(msg)
-        if self.progressbar:
-            self.progressbar.update_idletasks()
-
-    def _reset_progress(self):
-        self._set_progress(0.0, "")
-
     # ---- UI ---- #
     def _build_ui(self):
         # Only the layout overlay is displayed; login is automatic
@@ -225,15 +213,6 @@ class SensorPushGUI(tk.Tk):
         else:
             self._log("layout.png not found")
 
-        pb_frame = ttk.Frame(self)
-        pb_frame.pack(fill="x", padx=10, pady=(0, 10))
-        self.status_label = ttk.Label(pb_frame, textvariable=self.status_var)
-        self.status_label.pack(side="left", padx=(0, 10))
-        self.progressbar = ttk.Progressbar(
-            pb_frame, variable=self.progress_var, maximum=3
-        )
-        self.progressbar.pack(side="left", fill="x", expand=True)
-
     # ---- helpers ---- #
     def _log(self, msg: str):
         ts = time.strftime("%H:%M:%S")
@@ -255,8 +234,8 @@ class SensorPushGUI(tk.Tk):
             self.FigureCanvasTkAgg = FigureCanvasTkAgg
             self.mdates = mdates
 
-        # Reset progress bar before blocking network requests
-        self._set_progress(0, "Logging in…")
+        # Show loading overlay before blocking network requests
+        self._show_loading("Fetching data…")
 
         self._log("Logging in…")
         self.client = SensorPushClient(DEFAULT_EMAIL, DEFAULT_PASSWORD)
@@ -264,7 +243,6 @@ class SensorPushGUI(tk.Tk):
             self.client.login()
         except Exception as e:
             self._log(f"Login failed: {e}"); return
-        self._set_progress(1, "Getting sensors…")
         self._log("Login success. Getting sensors…")
         try:
             sensors = self.client.list_sensors()
@@ -272,7 +250,6 @@ class SensorPushGUI(tk.Tk):
             self._log(f"Sensor list error: {e}"); return
         self.sensors = {s["id"]: s for s in sensors}
         self._log(f"Found {len(self.sensors)} sensors. Fetching 24 h samples…")
-        self._set_progress(2, "Fetching samples…")
         threading.Thread(target=self._fetch_and_display, daemon=True).start()
 
     def _fetch_and_display(self):
@@ -281,7 +258,6 @@ class SensorPushGUI(tk.Tk):
         except Exception as e:
             self._log(f"Sample fetch error: {e}"); return
         self._log(f"Total samples fetched: {len(samples)}")
-        self.after(0, self._set_progress, 3, "Processing…")
         # group samples per sensor for later graph display
         self.samples_by_sensor.clear()
         for s in samples:
@@ -311,7 +287,7 @@ class SensorPushGUI(tk.Tk):
                 st["below"] += 1
         # Update layout directly since the sensor table was removed
         self.after(0, self._update_layout, stats)
-        self.after(0, self._reset_progress)
+        self.after(0, self._hide_loading)
 
     def _pct_to_color(self, pct: float) -> str:
         """Return a hex color from green->yellow->red for 0..100 percent."""
